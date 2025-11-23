@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { Camera, Upload, X, Check } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card, CardContent } from './ui/card';
@@ -19,6 +19,39 @@ export default function ImageUpload({ onImageSelected }) {
     setDebugInfo(prev => [...prev, `[${timestamp}] ${message}`]);
     console.log(message);
   };
+
+  // Effect to attach stream to video when camera mode is activated
+  useEffect(() => {
+    if (useCamera && stream && videoRef.current) {
+      addDebugInfo('🎥 useEffect: Attaching stream to video element');
+
+      try {
+        videoRef.current.srcObject = stream;
+
+        addDebugInfo(`Video element state: readyState=${videoRef.current.readyState}`);
+
+        // Wait for video to be ready
+        videoRef.current.onloadedmetadata = () => {
+          addDebugInfo(`✅ Video metadata loaded: ${videoRef.current.videoWidth}x${videoRef.current.videoHeight}`);
+
+          videoRef.current.play()
+            .then(() => {
+              addDebugInfo('✅ Video playing successfully');
+            })
+            .catch(e => {
+              addDebugInfo(`❌ Video play error: ${e.message}`);
+            });
+        };
+
+        videoRef.current.onerror = (e) => {
+          addDebugInfo(`❌ Video error: ${e}`);
+        };
+
+      } catch (e) {
+        addDebugInfo(`❌ Error setting srcObject: ${e.message}`);
+      }
+    }
+  }, [useCamera, stream]);
 
   const handleFileSelect = (e) => {
     const file = e.target.files[0];
@@ -76,23 +109,18 @@ export default function ImageUpload({ onImageSelected }) {
       addDebugInfo('✅ Camera access granted!');
       addDebugInfo(`Stream tracks: ${mediaStream.getTracks().length}`);
 
+      // Log track details
+      mediaStream.getTracks().forEach((track, index) => {
+        addDebugInfo(`Track ${index}: ${track.kind} - ${track.label} (enabled: ${track.enabled}, muted: ${track.muted})`);
+      });
+
+      // Store stream first
       setStream(mediaStream);
 
-      if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream;
-        // Ensure video plays on mobile
-        videoRef.current.setAttribute('playsinline', 'true');
-        videoRef.current.setAttribute('autoplay', 'true');
-
-        addDebugInfo('🎥 Setting video source...');
-        await videoRef.current.play().catch(e => {
-          addDebugInfo(`⚠️ Video play warning: ${e.message}`);
-        });
-        addDebugInfo('✅ Video playing');
-      }
-
+      // Then switch to camera mode (useEffect will attach stream to video)
       setUseCamera(true);
-      addDebugInfo('🎉 Camera started successfully!');
+
+      addDebugInfo('🎉 Camera initialization complete, switching to camera view...');
     } catch (error) {
       addDebugInfo(`❌ ERROR: ${error.name} - ${error.message}`);
       addDebugInfo(`Error stack: ${error.stack}`);
