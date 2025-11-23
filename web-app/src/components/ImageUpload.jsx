@@ -25,20 +25,64 @@ export default function ImageUpload({ onImageSelected }) {
 
   const startCamera = async () => {
     try {
-      const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } }
-      });
+      // Check if getUserMedia is supported
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error('您的浏览器不支持相机访问');
+      }
+
+      // Check for HTTPS (required for camera access)
+      if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
+        throw new Error('相机访问需要 HTTPS 连接');
+      }
+
+      console.log('Requesting camera access...');
+
+      // Request camera with mobile-friendly constraints
+      const constraints = {
+        video: {
+          facingMode: { ideal: 'environment' },
+          width: { ideal: 1920, max: 1920 },
+          height: { ideal: 1080, max: 1080 }
+        },
+        audio: false
+      };
+
+      const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+
+      console.log('Camera access granted');
       setStream(mediaStream);
+
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
+        // Ensure video plays on mobile
+        videoRef.current.setAttribute('playsinline', 'true');
+        videoRef.current.setAttribute('autoplay', 'true');
+        await videoRef.current.play().catch(e => console.warn('Video play warning:', e));
       }
+
       setUseCamera(true);
     } catch (error) {
       console.error('Error accessing camera:', error);
+
+      let errorMessage = error.message;
+
+      // Provide user-friendly error messages
+      if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+        errorMessage = '相机权限被拒绝。请在浏览器设置中允许相机访问。';
+      } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
+        errorMessage = '未找到相机设备。';
+      } else if (error.name === 'NotReadableError' || error.name === 'TrackStartError') {
+        errorMessage = '相机正在被其他应用使用。';
+      } else if (error.name === 'OverconstrainedError') {
+        errorMessage = '无法满足相机要求。';
+      } else if (error.name === 'SecurityError') {
+        errorMessage = '相机访问被安全策略阻止。请使用 HTTPS。';
+      }
+
       toast({
         variant: "destructive",
         title: t('error.cameraFailed'),
-        description: error.message,
+        description: errorMessage,
       });
     }
   };
@@ -141,7 +185,9 @@ export default function ImageUpload({ onImageSelected }) {
               ref={videoRef}
               autoPlay
               playsInline
+              muted
               className="w-full aspect-video object-cover"
+              style={{ WebkitPlaysinline: 'true' }}
             />
           </Card>
 
