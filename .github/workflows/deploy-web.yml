@@ -1,0 +1,28 @@
+# Optional: Auto-deploy web app on push
+# Uncomment and configure if you want GitHub Actions deployment
+
+# name: Deploy Web App
+#
+# on:
+#   push:
+#     branches: [main]
+#     paths:
+#       - 'web-app/**'
+#
+# jobs:
+#   deploy:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v3
+#       - uses: actions/setup-node@v3
+#         with:
+#           node-version: '18'
+#       - name: Install and Build
+#         working-directory: ./web-app
+#         run: |
+#           npm install
+#           npm run build
+#       - name: Deploy to Vercel
+#         run: |
+#           npm install -g vercel
+#           vercel --prod --token=${{ secrets.VERCEL_TOKEN }}
