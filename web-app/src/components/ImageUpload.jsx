@@ -268,14 +268,14 @@ export default function ImageUpload({ onImageSelected }) {
         </div>
       ) : (
         <div className="space-y-4">
-          <Card className="overflow-hidden">
+          <Card className="overflow-hidden bg-black">
             <video
               ref={videoRef}
               autoPlay
               playsInline
               muted
-              className="w-full aspect-video object-cover"
-              style={{ WebkitPlaysinline: 'true' }}
+              className="w-full h-auto object-contain"
+              style={{ WebkitPlaysinline: 'true', maxHeight: '70vh' }}
             />
           </Card>
 
