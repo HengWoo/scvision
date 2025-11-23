@@ -29,9 +29,21 @@ Using the [Sugarcane Leaf Disease Dataset](https://www.kaggle.com/datasets/nirma
 - **Source**: Real-world data from Maharashtra, India
 - **Capture**: Various smartphone cameras
 
-## Quick Start
+## 🚀 Quick Start
 
-### 1. Installation
+### Web App (Recommended - Deploy in 5 minutes!)
+
+```bash
+cd web-app
+npm install
+# Add your model: cp ~/Downloads/best.onnx public/
+npm run dev      # Test locally
+vercel --prod    # Deploy to production
+```
+
+**See [DEPLOY_NOW.md](DEPLOY_NOW.md) for complete deployment guide!**
+
+### Python CLI
 
 ```bash
 # Clone repository
@@ -87,19 +99,21 @@ python inference.py --model models/best.tflite --image test_leaf.jpg --tflite
 
 ```
 scvision/
-├── README.md                    # This file
-├── claude.md                    # Detailed documentation
-├── requirements.txt             # Python dependencies
-├── inference.py                 # Inference script
-├── dataset/                     # Dataset directory
-│   ├── train/
-│   ├── val/
-│   └── test/
-├── scripts/
-│   └── prepare_dataset.py      # Dataset organization
+├── web-app/                     # 🌐 Progressive Web App (NEW!)
+│   ├── src/                     # React components
+│   ├── public/                  # Static assets + model
+│   ├── README.md               # Web app setup
+│   ├── DEPLOYMENT.md           # Deployment guide
+│   └── QUICKSTART.md           # 5-min deploy guide
 ├── notebooks/
 │   └── train_colab.ipynb       # Training notebook
-└── models/                      # Trained model weights
+├── scripts/
+│   └── prepare_dataset.py      # Dataset organization
+├── inference.py                 # Python inference script
+├── requirements.txt             # Python dependencies
+├── DEPLOY_NOW.md               # 🚀 Quick deployment guide
+├── COLAB_QUICKSTART.md         # Colab training guide
+└── README.md                    # This file
 ```
 
 ## Model Performance
