@@ -1,10 +1,16 @@
 import React, { useRef, useState } from 'react';
+import { Camera, Upload, X, Check } from 'lucide-react';
+import { Button } from './ui/button';
+import { Card, CardContent } from './ui/card';
+import { useToast } from './ui/use-toast';
+import { t } from '@/lib/translations';
 
 export default function ImageUpload({ onImageSelected }) {
   const fileInputRef = useRef(null);
   const videoRef = useRef(null);
   const [useCamera, setUseCamera] = useState(false);
   const [stream, setStream] = useState(null);
+  const { toast } = useToast();
 
   const handleFileSelect = (e) => {
     const file = e.target.files[0];
@@ -29,7 +35,11 @@ export default function ImageUpload({ onImageSelected }) {
       setUseCamera(true);
     } catch (error) {
       console.error('Error accessing camera:', error);
-      alert('Could not access camera. Please upload an image instead.');
+      toast({
+        variant: "destructive",
+        title: t('error.cameraFailed'),
+        description: error.message,
+      });
     }
   };
 
@@ -59,24 +69,34 @@ export default function ImageUpload({ onImageSelected }) {
   };
 
   return (
-    <div style={styles.container}>
+    <div className="w-full max-w-2xl mx-auto">
       {!useCamera ? (
-        <div style={styles.uploadSection}>
-          <h2 style={styles.title}>Upload Sugarcane Leaf Image</h2>
-          <p style={styles.subtitle}>Take a photo or upload an existing image</p>
+        <div className="space-y-6">
+          <div className="text-center space-y-2">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold">{t('upload.title')}</h2>
+            <p className="text-sm md:text-base text-muted-foreground">{t('upload.subtitle')}</p>
+          </div>
 
-          <div style={styles.buttonGroup}>
-            <button onClick={startCamera} className="btn btn-primary" style={styles.fullWidthBtn}>
-              📸 Use Camera
-            </button>
-
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              className="btn btn-secondary"
-              style={styles.fullWidthBtn}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+            <Button
+              onClick={startCamera}
+              size="lg"
+              className="h-20 sm:h-24 text-base sm:text-lg"
+              variant="default"
             >
-              📁 Upload Image
-            </button>
+              <Camera className="w-5 h-5 sm:w-6 sm:h-6 mr-2" />
+              {t('upload.useCamera')}
+            </Button>
+
+            <Button
+              onClick={() => fileInputRef.current?.click()}
+              size="lg"
+              className="h-20 sm:h-24 text-base sm:text-lg"
+              variant="secondary"
+            >
+              <Upload className="w-5 h-5 sm:w-6 sm:h-6 mr-2" />
+              {t('upload.uploadImage')}
+            </Button>
           </div>
 
           <input
@@ -84,101 +104,58 @@ export default function ImageUpload({ onImageSelected }) {
             type="file"
             accept="image/*"
             onChange={handleFileSelect}
-            style={{ display: 'none' }}
+            className="hidden"
           />
 
-          <div style={styles.info}>
-            <p style={styles.infoText}>
-              <strong>Tips for best results:</strong>
-            </p>
-            <ul style={styles.tipsList}>
-              <li>Use good lighting</li>
-              <li>Capture the entire leaf</li>
-              <li>Avoid shadows and blur</li>
-              <li>Focus on diseased areas if visible</li>
-            </ul>
-          </div>
+          <Card className="bg-muted/50">
+            <CardContent className="pt-6">
+              <p className="text-sm sm:text-base font-semibold mb-3 flex items-center gap-2">
+                <Check className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+                {t('upload.tips.title')}
+              </p>
+              <ul className="space-y-2 text-xs sm:text-sm md:text-base text-muted-foreground">
+                <li className="flex items-start gap-2">
+                  <span className="text-primary mt-0.5">•</span>
+                  <span>{t('upload.tips.lighting')}</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-primary mt-0.5">•</span>
+                  <span>{t('upload.tips.fullLeaf')}</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-primary mt-0.5">•</span>
+                  <span>{t('upload.tips.avoidShadow')}</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-primary mt-0.5">•</span>
+                  <span>{t('upload.tips.focusDisease')}</span>
+                </li>
+              </ul>
+            </CardContent>
+          </Card>
         </div>
       ) : (
-        <div style={styles.cameraSection}>
-          <video
-            ref={videoRef}
-            autoPlay
-            playsInline
-            style={styles.video}
-          />
+        <div className="space-y-4">
+          <Card className="overflow-hidden">
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              className="w-full aspect-video object-cover"
+            />
+          </Card>
 
-          <div style={styles.cameraControls}>
-            <button onClick={capturePhoto} className="btn btn-primary">
-              📸 Capture Photo
-            </button>
-            <button onClick={stopCamera} className="btn btn-secondary">
-              ✕ Cancel
-            </button>
+          <div className="flex gap-3 justify-center max-w-2xl mx-auto">
+            <Button onClick={capturePhoto} size="lg" className="flex-1 text-base sm:text-lg">
+              <Camera className="w-5 h-5 sm:w-6 sm:h-6 mr-2" />
+              {t('upload.capture')}
+            </Button>
+            <Button onClick={stopCamera} size="lg" variant="outline" className="flex-1 text-base sm:text-lg">
+              {t('upload.cancel')}
+            </Button>
           </div>
         </div>
       )}
     </div>
   );
 }
-
-const styles = {
-  container: {
-    width: '100%',
-    maxWidth: '600px',
-    margin: '0 auto',
-  },
-  uploadSection: {
-    textAlign: 'center',
-  },
-  title: {
-    fontSize: '2rem',
-    fontWeight: 'bold',
-    color: '#1f2937',
-    marginBottom: '0.5rem',
-  },
-  subtitle: {
-    fontSize: '1rem',
-    color: '#6b7280',
-    marginBottom: '2rem',
-  },
-  buttonGroup: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '1rem',
-    marginBottom: '2rem',
-  },
-  fullWidthBtn: {
-    width: '100%',
-  },
-  info: {
-    background: '#f3f4f6',
-    borderRadius: '0.5rem',
-    padding: '1.5rem',
-    textAlign: 'left',
-  },
-  infoText: {
-    fontSize: '0.95rem',
-    color: '#374151',
-    marginBottom: '0.75rem',
-  },
-  tipsList: {
-    fontSize: '0.9rem',
-    color: '#6b7280',
-    paddingLeft: '1.5rem',
-    margin: 0,
-  },
-  cameraSection: {
-    position: 'relative',
-  },
-  video: {
-    width: '100%',
-    borderRadius: '1rem',
-    marginBottom: '1rem',
-  },
-  cameraControls: {
-    display: 'flex',
-    gap: '1rem',
-    justifyContent: 'center',
-  },
-};

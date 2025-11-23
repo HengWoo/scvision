@@ -1,102 +1,178 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap');
 
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  min-height: 100vh;
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-#root {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
+@layer base {
+  :root {
+    /* Agricultural theme colors */
+    --background: 46 96 92%; /* Soft cream #fefce8 */
+    --foreground: 27 46 16%; /* Dark green text */
 
-/* Utility Classes */
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 1rem;
-}
+    --card: 0 0 100%; /* White */
+    --card-foreground: 27 46 16%;
 
-.btn {
-  padding: 0.75rem 1.5rem;
-  font-size: 1rem;
-  font-weight: 600;
-  border: none;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  transition: all 0.2s;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-}
+    --popover: 0 0 100%;
+    --popover-foreground: 27 46 16%;
 
-.btn-primary {
-  background: #10b981;
-  color: white;
-}
+    --primary: 158 64 52%; /* Sugarcane green #059669 */
+    --primary-foreground: 0 0 100%;
 
-.btn-primary:hover {
-  background: #059669;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
-}
+    --secondary: 30 81 12%; /* Earth brown #78350f */
+    --secondary-foreground: 0 0 100%;
 
-.btn-secondary {
-  background: #6366f1;
-  color: white;
-}
+    --muted: 84 85 93%; /* Light gray */
+    --muted-foreground: 27 46 45%;
 
-.btn-secondary:hover {
-  background: #4f46e5;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
-}
+    --accent: 38 92 50%; /* Golden harvest #f59e0b */
+    --accent-foreground: 27 46 16%;
 
-.btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
-}
+    --destructive: 0 84 60%;
+    --destructive-foreground: 0 0 100%;
 
-.card {
-  background: white;
-  border-radius: 1rem;
-  padding: 1.5rem;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-}
+    --border: 84 85 91%;
+    --input: 84 85 91%;
+    --ring: 158 64 52%;
 
-.spinner {
-  border: 3px solid rgba(255, 255, 255, 0.3);
-  border-radius: 50%;
-  border-top: 3px solid white;
-  width: 40px;
-  height: 40px;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .container {
-    padding: 0 0.5rem;
+    --radius: 0.75rem;
   }
 
-  .btn {
-    width: 100%;
-    justify-content: center;
+  .dark {
+    --background: 27 46 6%;
+    --foreground: 0 0 98%;
+
+    --card: 27 46 10%;
+    --card-foreground: 0 0 98%;
+
+    --popover: 27 46 10%;
+    --popover-foreground: 0 0 98%;
+
+    --primary: 158 64 52%;
+    --primary-foreground: 0 0 100%;
+
+    --secondary: 30 81 18%;
+    --secondary-foreground: 0 0 100%;
+
+    --muted: 27 46 15%;
+    --muted-foreground: 84 85 65%;
+
+    --accent: 38 92 50%;
+    --accent-foreground: 27 46 10%;
+
+    --destructive: 0 62 51%;
+    --destructive-foreground: 0 0 98%;
+
+    --border: 27 46 15%;
+    --input: 27 46 15%;
+    --ring: 158 64 52%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans;
+    font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    min-height: 100vh;
+    position: relative;
+  }
+
+  /* Subtle woven texture background */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image:
+      repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 2px,
+        rgba(22, 163, 74, 0.02) 2px,
+        rgba(22, 163, 74, 0.02) 4px
+      ),
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(22, 163, 74, 0.02) 2px,
+        rgba(22, 163, 74, 0.02) 4px
+      );
+    background-size: 20px 20px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  #root {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+@layer utilities {
+  /* Custom animations */
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slide-in-right {
+    from {
+      opacity: 0;
+      transform: translateX(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.3s ease-out;
+  }
+
+  .animate-slide-in {
+    animation: slide-in-right 0.4s ease-out;
+  }
+
+  /* Text selection */
+  ::selection {
+    background-color: hsl(var(--primary) / 0.2);
+    color: hsl(var(--foreground));
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--muted));
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--primary));
+    border-radius: 5px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--primary) / 0.8);
   }
 }

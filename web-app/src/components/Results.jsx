@@ -1,258 +1,206 @@
 import React from 'react';
+import { RotateCcw, Save, Clock } from 'lucide-react';
+import { Button } from './ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import { Badge } from './ui/badge';
+import { Progress } from './ui/progress';
+import { Separator } from './ui/separator';
+import { useToast } from './ui/use-toast';
+import { t, zh } from '@/lib/translations';
 
-export default function Results({ image, prediction, onNewImage }) {
+export default function Results({ image, prediction, onNewImage, onSaveToHistory }) {
+  const { toast } = useToast();
+
   if (!prediction) return null;
 
   const { disease, confidencePercent, allPredictions, inferenceTime, info } = prediction;
 
+  // Get Chinese disease info
+  const diseaseInfo = zh.diseases[disease];
+
+  const handleSave = () => {
+    onSaveToHistory();
+    toast({
+      title: "已保存",
+      description: "分析结果已保存到历史记录",
+    });
+  };
+
   return (
-    <div style={styles.container}>
-      <div style={styles.header}>
-        <h2 style={styles.title}>Analysis Results</h2>
-        <span style={styles.badge}>
-          ⚡ {inferenceTime}ms
-        </span>
+    <div className="w-full max-w-3xl mx-auto space-y-5 sm:space-y-6 animate-fade-in">
+      {/* Header with Inference Time */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl sm:text-2xl md:text-3xl font-bold">{t('results.title')}</h2>
+        <Badge variant="secondary" className="gap-1.5 text-xs sm:text-sm px-3 py-1.5 shadow-sm">
+          <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+          <span className="font-bold">{inferenceTime}</span>{t('results.ms')}
+        </Badge>
       </div>
 
       {/* Image Preview */}
-      <div style={styles.imageContainer}>
-        <img src={image} alt="Analyzed leaf" style={styles.image} />
-      </div>
+      <Card className="overflow-hidden border-0 shadow-md">
+        <img
+          src={image}
+          alt="Analyzed leaf"
+          className="w-full h-auto object-contain max-h-56 sm:max-h-80 md:max-h-96"
+        />
+      </Card>
 
-      {/* Main Diagnosis */}
-      <div style={{ ...styles.diagnosisCard, borderColor: info.color }}>
-        <div style={styles.diagnosisHeader}>
-          <span style={{ ...styles.icon, backgroundColor: info.color }}>
-            {info.icon}
-          </span>
-          <div>
-            <h3 style={styles.diseaseName}>{disease}</h3>
-            <p style={styles.confidence}>
-              Confidence: <strong>{confidencePercent}%</strong>
+      {/* Main Diagnosis Card */}
+      <Card className="relative overflow-hidden border-0 shadow-lg">
+        {/* Gradient Background Overlay */}
+        <div
+          className="absolute inset-0 opacity-5"
+          style={{
+            background: `linear-gradient(135deg, ${info.color} 0%, transparent 100%)`
+          }}
+        />
+
+        <CardHeader className="relative pb-4 sm:pb-6">
+          {/* Status Badge */}
+          <div className="flex items-center justify-between mb-4">
+            <div
+              className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold"
+              style={{
+                backgroundColor: info.color + '20',
+                color: info.color
+              }}
+            >
+              <div className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: info.color }} />
+              检测完成
+            </div>
+            <div
+              className="text-2xl sm:text-3xl md:text-4xl font-bold"
+              style={{ color: info.color }}
+            >
+              {confidencePercent}%
+            </div>
+          </div>
+
+          {/* Disease Name with Icon */}
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div
+              className="w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-3xl flex items-center justify-center text-3xl sm:text-4xl md:text-5xl shadow-lg"
+              style={{
+                backgroundColor: info.color + '15',
+                border: `3px solid ${info.color}30`
+              }}
+            >
+              {info.icon}
+            </div>
+            <div className="flex-1">
+              <CardTitle className="text-2xl sm:text-3xl md:text-4xl mb-1 sm:mb-2" style={{ color: info.color }}>
+                {diseaseInfo.name}
+              </CardTitle>
+              <p className="text-xs sm:text-sm md:text-base text-muted-foreground font-medium">
+                {t('results.confidence')}{confidencePercent}%
+              </p>
+            </div>
+          </div>
+        </CardHeader>
+
+        <CardContent className="relative space-y-5 sm:space-y-6">
+          {/* Description */}
+          <div className="bg-muted/30 rounded-2xl p-4 sm:p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <div
+                className="w-1 h-5 rounded-full"
+                style={{ backgroundColor: info.color }}
+              />
+              <h4 className="text-base sm:text-lg md:text-xl font-bold">{t('results.description')}</h4>
+            </div>
+            <p className="text-sm sm:text-base md:text-lg text-foreground/80 leading-relaxed">
+              {diseaseInfo.description}
             </p>
           </div>
-        </div>
 
-        <div style={styles.diagnosisInfo}>
-          <div style={styles.infoSection}>
-            <h4 style={styles.infoTitle}>Description</h4>
-            <p style={styles.infoText}>{info.description}</p>
+          {/* Treatment */}
+          <div className="bg-primary/5 rounded-2xl p-4 sm:p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <div
+                className="w-1 h-5 rounded-full bg-primary"
+              />
+              <h4 className="text-base sm:text-lg md:text-xl font-bold flex items-center gap-2">
+                {t('results.treatment')}
+              </h4>
+            </div>
+            <p className="text-sm sm:text-base md:text-lg text-foreground/80 leading-relaxed">
+              {diseaseInfo.treatment}
+            </p>
           </div>
-
-          <div style={styles.infoSection}>
-            <h4 style={styles.infoTitle}>💊 Treatment</h4>
-            <p style={styles.infoText}>{info.treatment}</p>
-          </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       {/* All Predictions */}
-      <div style={styles.allPredictions}>
-        <h4 style={styles.predictionsTitle}>All Predictions:</h4>
-        {allPredictions.map((pred, index) => (
-          <div key={index} style={styles.predictionRow}>
-            <div style={styles.predictionLeft}>
-              <span style={{
-                ...styles.predictionIcon,
-                backgroundColor: pred.info.color
-              }}>
-                {pred.info.icon}
-              </span>
-              <span style={styles.predictionName}>{pred.disease}</span>
-            </div>
-            <div style={styles.predictionRight}>
-              <div style={styles.progressBar}>
-                <div
+      <Card className="border-0 shadow-md">
+        <CardHeader>
+          <CardTitle className="text-lg sm:text-xl md:text-2xl font-bold">{t('results.allPredictions')}</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4 sm:space-y-5">
+          {allPredictions.map((pred, index) => {
+            const predDiseaseInfo = zh.diseases[pred.disease];
+            const isTopPrediction = index === 0;
+            return (
+              <div
+                key={index}
+                className={`rounded-xl p-3 sm:p-4 transition-all ${
+                  isTopPrediction ? 'bg-primary/5' : 'bg-muted/30'
+                }`}
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center text-base sm:text-lg shadow-sm"
+                      style={{
+                        backgroundColor: pred.info.color + '20',
+                        color: pred.info.color,
+                        border: `2px solid ${pred.info.color}30`
+                      }}
+                    >
+                      {pred.info.icon}
+                    </div>
+                    <span className="text-sm sm:text-base md:text-lg font-bold">{predDiseaseInfo.name}</span>
+                  </div>
+                  <span
+                    className="text-base sm:text-lg md:text-xl font-bold"
+                    style={{ color: pred.info.color }}
+                  >
+                    {(pred.confidence * 100).toFixed(1)}%
+                  </span>
+                </div>
+                <Progress
+                  value={pred.confidence * 100}
+                  className="h-2.5 sm:h-3"
                   style={{
-                    ...styles.progressFill,
-                    width: `${pred.confidence * 100}%`,
-                    backgroundColor: pred.info.color
+                    backgroundColor: pred.info.color + '20'
                   }}
                 />
               </div>
-              <span style={styles.predictionPercent}>
-                {(pred.confidence * 100).toFixed(1)}%
-              </span>
-            </div>
-          </div>
-        ))}
-      </div>
+            );
+          })}
+        </CardContent>
+      </Card>
 
-      {/* Actions */}
-      <div style={styles.actions}>
-        <button onClick={onNewImage} className="btn btn-primary" style={styles.fullWidthBtn}>
-          🔄 Analyze Another Image
-        </button>
+      {/* Action Buttons */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        <Button
+          onClick={handleSave}
+          variant="outline"
+          size="lg"
+          className="flex-1 h-12 sm:h-14 text-base sm:text-lg font-semibold shadow-sm hover:shadow-md transition-shadow"
+        >
+          <Save className="w-5 h-5 sm:w-6 sm:h-6 mr-2" />
+          {t('results.saveToHistory')}
+        </Button>
+        <Button
+          onClick={onNewImage}
+          size="lg"
+          className="flex-1 h-12 sm:h-14 text-base sm:text-lg font-semibold shadow-md hover:shadow-lg transition-shadow"
+        >
+          <RotateCcw className="w-5 h-5 sm:w-6 sm:h-6 mr-2" />
+          {t('results.analyzeAnother')}
+        </Button>
       </div>
     </div>
   );
 }
-
-const styles = {
-  container: {
-    width: '100%',
-    maxWidth: '700px',
-    margin: '0 auto',
-  },
-  header: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: '1.5rem',
-  },
-  title: {
-    fontSize: '1.75rem',
-    fontWeight: 'bold',
-    color: '#1f2937',
-  },
-  badge: {
-    background: '#e5e7eb',
-    color: '#374151',
-    padding: '0.5rem 1rem',
-    borderRadius: '0.5rem',
-    fontSize: '0.875rem',
-    fontWeight: '600',
-  },
-  imageContainer: {
-    marginBottom: '1.5rem',
-    borderRadius: '1rem',
-    overflow: 'hidden',
-    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-  },
-  image: {
-    width: '100%',
-    display: 'block',
-  },
-  diagnosisCard: {
-    background: 'white',
-    borderRadius: '1rem',
-    padding: '1.5rem',
-    marginBottom: '1.5rem',
-    borderLeft: '4px solid',
-    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.05)',
-  },
-  diagnosisHeader: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '1rem',
-    marginBottom: '1.5rem',
-  },
-  icon: {
-    width: '50px',
-    height: '50px',
-    borderRadius: '50%',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: '1.5rem',
-    color: 'white',
-    flexShrink: 0,
-  },
-  diseaseName: {
-    fontSize: '1.5rem',
-    fontWeight: 'bold',
-    color: '#1f2937',
-    margin: 0,
-  },
-  confidence: {
-    fontSize: '1rem',
-    color: '#6b7280',
-    margin: '0.25rem 0 0 0',
-  },
-  diagnosisInfo: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '1rem',
-  },
-  infoSection: {
-    background: '#f9fafb',
-    padding: '1rem',
-    borderRadius: '0.5rem',
-  },
-  infoTitle: {
-    fontSize: '0.95rem',
-    fontWeight: '600',
-    color: '#374151',
-    marginBottom: '0.5rem',
-  },
-  infoText: {
-    fontSize: '0.9rem',
-    color: '#6b7280',
-    lineHeight: '1.5',
-    margin: 0,
-  },
-  allPredictions: {
-    background: 'white',
-    borderRadius: '1rem',
-    padding: '1.5rem',
-    marginBottom: '1.5rem',
-    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.05)',
-  },
-  predictionsTitle: {
-    fontSize: '1rem',
-    fontWeight: '600',
-    color: '#374151',
-    marginBottom: '1rem',
-  },
-  predictionRow: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: '0.75rem 0',
-    borderBottom: '1px solid #f3f4f6',
-  },
-  predictionLeft: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.75rem',
-    minWidth: '120px',
-  },
-  predictionIcon: {
-    width: '32px',
-    height: '32px',
-    borderRadius: '50%',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: '0.875rem',
-    color: 'white',
-    flexShrink: 0,
-  },
-  predictionName: {
-    fontSize: '0.9rem',
-    fontWeight: '500',
-    color: '#374151',
-  },
-  predictionRight: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '1rem',
-    flex: 1,
-    marginLeft: '1rem',
-  },
-  progressBar: {
-    flex: 1,
-    height: '8px',
-    background: '#e5e7eb',
-    borderRadius: '4px',
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: '100%',
-    transition: 'width 0.3s ease',
-  },
-  predictionPercent: {
-    fontSize: '0.875rem',
-    fontWeight: '600',
-    color: '#6b7280',
-    minWidth: '50px',
-    textAlign: 'right',
-  },
-  actions: {
-    display: 'flex',
-    gap: '1rem',
-  },
-  fullWidthBtn: {
-    width: '100%',
-  },
-};

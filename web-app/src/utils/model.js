@@ -47,8 +47,9 @@ export async function loadModel(modelPath) {
   try {
     console.log('Loading ONNX model from:', modelPath);
 
-    // Configure ONNX Runtime
-    ort.env.wasm.wasmPaths = 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.16.3/dist/';
+    // Configure ONNX Runtime to use CDN for WASM files
+    ort.env.wasm.wasmPaths = 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.23.2/dist/';
+    ort.env.wasm.numThreads = 1; // Use single-threaded for compatibility
 
     session = await ort.InferenceSession.create(modelPath, {
       executionProviders: ['wasm'],
