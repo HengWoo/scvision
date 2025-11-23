@@ -34,7 +34,7 @@ export default defineConfig({
         ]
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,wasm}'],
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,onnx}'],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/cdn\.jsdelivr\.net\/.*/i,
@@ -51,14 +51,20 @@ export default defineConfig({
       }
     })
   ],
+  assetsInclude: ['**/*.onnx'], // Only include .onnx model files as assets
   build: {
     target: 'esnext',
+    assetsInlineLimit: 0, // Don't inline any assets
     rollupOptions: {
       output: {
         manualChunks: {
           'onnx': ['onnxruntime-web']
         }
-      }
+      },
+      external: [
+        // Exclude WASM files - they'll be loaded from CDN
+        /\.wasm$/
+      ]
     }
   }
 })

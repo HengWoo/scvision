@@ -6,10 +6,12 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:deploy": "vite build && find dist/assets -name '*.wasm' -type f -delete && echo 'Build complete! WASM files removed (loaded from CDN)'",
     "preview": "vite preview",
-    "deploy": "npm run build && echo 'Ready to deploy dist/ folder'"
+    "deploy": "npm run build:deploy && echo 'Ready to deploy dist/ folder'"
   },
   "dependencies": {
+    "lucide-react": "^0.263.1",
     "onnxruntime-web": "^1.16.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
