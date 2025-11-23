@@ -10,7 +10,15 @@ export default function ImageUpload({ onImageSelected }) {
   const videoRef = useRef(null);
   const [useCamera, setUseCamera] = useState(false);
   const [stream, setStream] = useState(null);
+  const [debugInfo, setDebugInfo] = useState([]);
+  const [cameraError, setCameraError] = useState(null);
   const { toast } = useToast();
+
+  const addDebugInfo = (message) => {
+    const timestamp = new Date().toLocaleTimeString();
+    setDebugInfo(prev => [...prev, `[${timestamp}] ${message}`]);
+    console.log(message);
+  };
 
   const handleFileSelect = (e) => {
     const file = e.target.files[0];
@@ -24,18 +32,31 @@ export default function ImageUpload({ onImageSelected }) {
   };
 
   const startCamera = async () => {
+    setCameraError(null);
+    setDebugInfo([]);
+
     try {
+      addDebugInfo('📱 Starting camera initialization...');
+      addDebugInfo(`🔒 Protocol: ${window.location.protocol}`);
+      addDebugInfo(`🌐 Hostname: ${window.location.hostname}`);
+      addDebugInfo(`📍 User Agent: ${navigator.userAgent}`);
+
       // Check if getUserMedia is supported
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        throw new Error('您的浏览器不支持相机访问');
+      if (!navigator.mediaDevices) {
+        throw new Error('navigator.mediaDevices 不存在');
       }
+      addDebugInfo('✅ navigator.mediaDevices exists');
+
+      if (!navigator.mediaDevices.getUserMedia) {
+        throw new Error('getUserMedia 不支持');
+      }
+      addDebugInfo('✅ getUserMedia is supported');
 
       // Check for HTTPS (required for camera access)
       if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
         throw new Error('相机访问需要 HTTPS 连接');
       }
-
-      console.log('Requesting camera access...');
+      addDebugInfo('✅ HTTPS check passed');
 
       // Request camera with mobile-friendly constraints
       const constraints = {
@@ -47,9 +68,14 @@ export default function ImageUpload({ onImageSelected }) {
         audio: false
       };
 
+      addDebugInfo('📸 Requesting camera access...');
+      addDebugInfo(`Constraints: ${JSON.stringify(constraints)}`);
+
       const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
 
-      console.log('Camera access granted');
+      addDebugInfo('✅ Camera access granted!');
+      addDebugInfo(`Stream tracks: ${mediaStream.getTracks().length}`);
+
       setStream(mediaStream);
 
       if (videoRef.current) {
@@ -57,12 +83,19 @@ export default function ImageUpload({ onImageSelected }) {
         // Ensure video plays on mobile
         videoRef.current.setAttribute('playsinline', 'true');
         videoRef.current.setAttribute('autoplay', 'true');
-        await videoRef.current.play().catch(e => console.warn('Video play warning:', e));
+
+        addDebugInfo('🎥 Setting video source...');
+        await videoRef.current.play().catch(e => {
+          addDebugInfo(`⚠️ Video play warning: ${e.message}`);
+        });
+        addDebugInfo('✅ Video playing');
       }
 
       setUseCamera(true);
+      addDebugInfo('🎉 Camera started successfully!');
     } catch (error) {
-      console.error('Error accessing camera:', error);
+      addDebugInfo(`❌ ERROR: ${error.name} - ${error.message}`);
+      addDebugInfo(`Error stack: ${error.stack}`);
 
       let errorMessage = error.message;
 
@@ -78,6 +111,8 @@ export default function ImageUpload({ onImageSelected }) {
       } else if (error.name === 'SecurityError') {
         errorMessage = '相机访问被安全策略阻止。请使用 HTTPS。';
       }
+
+      setCameraError({ name: error.name, message: errorMessage, originalMessage: error.message });
 
       toast({
         variant: "destructive",
@@ -177,6 +212,31 @@ export default function ImageUpload({ onImageSelected }) {
               </ul>
             </CardContent>
           </Card>
+
+          {/* Debug Info Panel */}
+          {(debugInfo.length > 0 || cameraError) && (
+            <Card className="bg-destructive/10 border-destructive/50">
+              <CardContent className="pt-6">
+                <p className="text-sm font-bold mb-2">🔍 调试信息 (Debug Info):</p>
+
+                {cameraError && (
+                  <div className="mb-3 p-3 bg-destructive/20 rounded-lg">
+                    <p className="text-sm font-bold text-destructive">错误类型: {cameraError.name}</p>
+                    <p className="text-sm text-destructive">{cameraError.message}</p>
+                    <p className="text-xs text-muted-foreground mt-1">原始错误: {cameraError.originalMessage}</p>
+                  </div>
+                )}
+
+                <div className="space-y-1 max-h-64 overflow-y-auto">
+                  {debugInfo.map((info, index) => (
+                    <p key={index} className="text-xs font-mono bg-background/50 p-2 rounded">
+                      {info}
+                    </p>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       ) : (
         <div className="space-y-4">
