@@ -44,7 +44,7 @@ let session = null;
  * @param {string} modelPath - Path to the ONNX model file
  * @param {number} timeout - Timeout in milliseconds (default: 15000)
  */
-export async function loadModel(modelPath, timeout = 15000) {
+export async function loadModel(modelPath, timeout = 90000) {
   try {
     console.log('Loading ONNX model from:', modelPath);
 
@@ -60,7 +60,7 @@ export async function loadModel(modelPath, timeout = 15000) {
 
     // Create timeout promise
     const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('Model loading timeout (15s)')), timeout);
+      setTimeout(() => reject(new Error('Model loading timeout (90s) - Network too slow or blocked')), timeout);
     });
 
     // Race between loading and timeout
