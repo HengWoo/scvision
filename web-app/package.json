@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "build:deploy": "vite build && find dist/assets -name '*.wasm' -type f -delete && echo 'Build complete! WASM files removed (loaded from CDN)'",
+    "build:deploy": "vite build && echo 'Build complete! WASM files included for China accessibility'",
     "preview": "vite preview",
     "deploy": "npm run build:deploy && echo 'Ready to deploy dist/ folder'"
   },

@@ -40,21 +40,31 @@ export const DISEASE_INFO = {
 let session = null;
 
 /**
- * Load the ONNX model
+ * Load the ONNX model with timeout
  * @param {string} modelPath - Path to the ONNX model file
+ * @param {number} timeout - Timeout in milliseconds (default: 15000)
  */
-export async function loadModel(modelPath) {
+export async function loadModel(modelPath, timeout = 15000) {
   try {
     console.log('Loading ONNX model from:', modelPath);
 
-    // Configure ONNX Runtime to use CDN for WASM files
-    ort.env.wasm.wasmPaths = 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.23.2/dist/';
+    // Configure ONNX Runtime to use local WASM files (China-friendly)
+    ort.env.wasm.wasmPaths = '/onnx-wasm/';
     ort.env.wasm.numThreads = 1; // Use single-threaded for compatibility
 
-    session = await ort.InferenceSession.create(modelPath, {
+    // Create model loading promise
+    const loadPromise = ort.InferenceSession.create(modelPath, {
       executionProviders: ['wasm'],
       graphOptimizationLevel: 'all'
     });
+
+    // Create timeout promise
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Model loading timeout (15s)')), timeout);
+    });
+
+    // Race between loading and timeout
+    session = await Promise.race([loadPromise, timeoutPromise]);
 
     console.log('Model loaded successfully!');
     return true;
