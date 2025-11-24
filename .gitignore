@@ -10,8 +10,8 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
-lib64/
+/lib/
+/lib64/
 parts/
 sdist/
 var/
@@ -51,6 +51,7 @@ sugarcane_disease/
 *.pt
 *.tflite
 *.onnx
+!web-app/public/best.onnx
 *.weights
 
 # Kaggle credentials
